@@ -1,4 +1,3 @@
-// src/context/context.jsx
 import React, { createContext, useState } from "react";
 import { ai } from "../config/Gemini";
 
@@ -12,36 +11,39 @@ const ContextProvider = ({ children }) => {
   const [showResult, setShowResult] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const onSent = async () => {
+  const onSent = async (prompt) => {
     setResultData("");
     setLoading(true);
     setShowResult(true);
+    setRecentPrompt(prompt);
     try {
       const response = await ai.models.generateContent({
         model: "gemini-2.5-flash",
-        contents: input,
+        contents: prompt,
       });
 
-      const result = await response.text();
+      const result = response.text;
       setResultData(result);
     } catch (error) {
       console.error("Gemini API Error:", error);
+      setResultData("Something went wrong.");
+    } finally {
+      setLoading(false);
     }
   };
 
   const contextValue = {
     onSent,
-    resultData,
     prevPrompts,
     setPrevPrompts,
     setRecentPrompt,
     recentPrompt,
     showResult,
     setLoading,
-    resultData,
     input,
     setInput,
     loading,
+    resultData,
   };
 
   return <context.Provider value={contextValue}>{children}</context.Provider>;
